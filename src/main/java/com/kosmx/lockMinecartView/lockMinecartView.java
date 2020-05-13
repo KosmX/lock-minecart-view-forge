@@ -32,6 +32,7 @@ public class lockMinecartView
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::warn);  //try to warn, if the mod is in the server's mods folder
 
+       //FMLJavaModLoadingContext.get().getModEventBus().addListener(this:preInit);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
 
         // Register ourselves for server and other game events we are interested in
@@ -43,13 +44,16 @@ public class lockMinecartView
         LOGGER.error("Better minecart rotation is Client ONLY!!! :D");
     }
 
+    //private void preInit(FML)
+
     private void doClientStuff(final FMLClientSetupEvent event) {
         // do something that can only be done on the client
         keyBinding = new KeyBinding("toggle", GLFW.GLFW_KEY_F7, "Better minecart");
 
         ClientRegistry.registerKeyBinding(keyBinding);
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(LockViewClient::keyEvent);
+        //FMLJavaModLoadingContext.get().getModEventBus().addListener(LockViewClient::keyEvent);
+        MinecraftForge.EVENT_BUS.register(new keyInputHandler());
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, LockViewMenu.config);
 

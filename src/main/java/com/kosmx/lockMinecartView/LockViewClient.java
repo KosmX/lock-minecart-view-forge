@@ -172,11 +172,11 @@ public class LockViewClient{
         KeyBindingRegistry.INSTANCE.register(keyBinding);
         ClientTickCallback.EVENT.register(e ->
         */
-        @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
+        //@SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
         public static void keyEvent(InputEvent.KeyInputEvent e)
         {
-            LOGGER.info("spam");
-            if (keyBinding.isPressed()){
+            //LOGGER.info("spam");
+            if (keyBinding.isKeyDown()){
                 if(isHeld)return;
                 isHeld = true;
                 enabled = onStartRiding();
