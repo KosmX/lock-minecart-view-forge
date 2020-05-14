@@ -1,11 +1,7 @@
 package com.kosmx.lockMinecartView;
 
-import net.java.games.input.Keyboard;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -47,6 +43,7 @@ public class lockMinecartView
     //private void preInit(FML)
 
     private void doClientStuff(final FMLClientSetupEvent event) {
+        isMixinIn();
         // do something that can only be done on the client
         keyBinding = new KeyBinding("toggle", GLFW.GLFW_KEY_F7, "Better minecart");
 
@@ -62,7 +59,14 @@ public class lockMinecartView
         LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
     }
 
-
+    private void isMixinIn(){
+        try {
+            Class.forName("org.spongepowered.asm.launch.Phases");
+        }
+        catch (ClassNotFoundException e) {
+            LOGGER.fatal("MixinBootstrap not found :( did you download it? \n https://www.curseforge.com/minecraft/mc-mods/mixinbootstrap");
+        }
+    }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     /*@SubscribeEvent
