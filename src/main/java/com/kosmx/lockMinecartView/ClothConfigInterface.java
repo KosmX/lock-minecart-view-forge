@@ -5,6 +5,7 @@ import me.shedaniel.forge.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.forge.clothconfig2.api.ConfigCategory;
 import me.shedaniel.forge.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.text.TranslationTextComponent;
 
 public class ClothConfigInterface {
 
@@ -13,7 +14,7 @@ public class ClothConfigInterface {
 
         ConfigBuilder builder = ConfigBuilder.create();
 
-        ConfigCategory general = builder.getOrCreateCategory(getTranslationStr("title"));
+        ConfigCategory general = builder.getOrCreateCategory("general menu");
 
         ConfigEntryBuilder smoothMode = builder.entryBuilder();
         ConfigEntryBuilder smartMode = builder.entryBuilder();
@@ -22,33 +23,33 @@ public class ClothConfigInterface {
         ConfigEntryBuilder enabled = builder.entryBuilder();
 
         general.addEntry(smoothMode
-                                 .startBooleanToggle(getTranslationStr("smoothMode"), LockViewConfig.smoothMode.get())
+                                 .startBooleanToggle("Smooth rotation mode", LockViewConfig.smoothMode.get())
                                  .setDefaultValue(true)
-                                 .setTooltip(getTooltipTranslation("smoothMode"))
+                                 .setTooltip(":D")
                                  .setSaveConsumer(newValue -> LockViewConfig.smoothMode.set(newValue))
                                  .build());
         general.addEntry(smartMode
-                                 .startBooleanToggle(getTranslationStr("smartMode"), LockViewConfig.smartMode.get())
+                                 .startBooleanToggle("Smart mode (hint)", LockViewConfig.smartMode.get())
                                  .setDefaultValue(true)
-                                 .setTooltip(getTooltipTranslation("smartMode"))
+                                 .setTooltip("Don't rotate when crash into something and start moving in opposite direction")
                                  .setSaveConsumer(newValue -> LockViewConfig.smartMode.set(newValue))
                                  .build());
         general.addEntry(threshold
-                                 .startIntSlider(getTranslationStr("threshold"), LockViewConfig.threshold.get(), 0, 80)
+                                 .startIntSlider("Rotation reset treshold", LockViewConfig.threshold.get(), 0, 80)
                                  .setDefaultValue(8)
-                                 .setTooltip(getTooltipTranslation("threshold"))
+                                 .setTooltip("Smart mode's sub-option, try changing it's value. 20 tick is 1 second")
                                  .setSaveConsumer(newValue -> LockViewConfig.threshold.set(newValue))
                                  .build());
         general.addEntry(rollerCoasterMode
-                                 .startBooleanToggle(getTranslationStr("rollerCoasterMode"), LockViewConfig.rollerCoasterMode.get())
+                                 .startBooleanToggle("Roller Coaster mode", LockViewConfig.rollerCoasterMode.get())
                                  .setDefaultValue(false)
-                                 .setTooltip(getTooltipTranslation("rollerCoasterMode"))
+                                 .setTooltip("Enforce to look forward. Smart mode has no effect, if turned on")
                                  .setSaveConsumer(newValue -> LockViewConfig.rollerCoasterMode.set(newValue))
                                  .build());
         general.addEntry(enabled
-                                 .startBooleanToggle(getTranslationStr("enabled"), LockViewConfig.enableByDefault.get())
+                                 .startBooleanToggle("Enable mod on starting the game", LockViewConfig.enableByDefault.get())
                                  .setDefaultValue(true)
-                                 .setTooltip(getTooltipTranslation("enabled"))
+                                 .setTooltip("spenceregilbert asked me, to add this entry")
                                  .setSaveConsumer(newValue -> LockViewConfig.enableByDefault.set(newValue))
                                  .build());
         //Screen screen = builder.build();
@@ -56,10 +57,4 @@ public class ClothConfigInterface {
     }
 
 
-    private static String getTranslationStr(String str){
-        return "text.autoconfig.lock_minecart_view." + str;
-    }
-    private static String getTooltipTranslation(String str){
-        return getTranslationStr(str) + ".@Tooltip";
-    }
 }

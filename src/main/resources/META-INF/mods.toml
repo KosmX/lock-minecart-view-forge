@@ -30,6 +30,20 @@ logoFile="icon.png" #optional
 authors="KosmX" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-This is a long form description of the mod. You can write whatever you want here
+When you turn with minecart, but you still look to the last direction and you want to change this, this mod is for you.
+:D
 '''
+      [[dependencies.lock_minecart_view]]
+        modId="cloth-config2"
+        mandatory=true
+        versionRange="[3.0,)"
+        ordering="NONE"
+        side="BOTH"
 
+
+      [[dependencies.lock_minecart_view]]
+        modId="gamemenumodoption"
+        mandatory=false
+        versionRange="*"
+        ordering="NONE"
+        side="BOTH"
