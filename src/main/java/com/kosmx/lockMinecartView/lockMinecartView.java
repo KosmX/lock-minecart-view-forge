@@ -1,7 +1,10 @@
 package com.kosmx.lockMinecartView;
 
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -55,6 +58,12 @@ public class lockMinecartView
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, LockViewMenu.config);
 
         LockViewMenu.loadConfig(LockViewMenu.config, FMLPaths.CONFIGDIR.get().resolve("lock_minecart_view.toml").toString());
+        LockViewClient.enabled = LockViewConfig.enableByDefault.get();
+
+        //DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> new ClothConfigInterface());
+        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (client, parent) -> {
+            return ClothConfigInterface.getClothConfigInterface().build();
+        });
 
         LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
     }

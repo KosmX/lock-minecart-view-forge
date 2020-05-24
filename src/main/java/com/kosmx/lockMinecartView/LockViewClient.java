@@ -123,6 +123,15 @@ public class LockViewClient{
             if (Math.abs(LockViewClient.rawLastYaw - LockViewClient.rawYaw) > 180f-ang && Math.abs(LockViewClient.rawLastYaw - LockViewClient.rawYaw)<180+ang){
                 correction = true;
             }
+            /*-------------------Explain, what does the following complicated code------------------------
+             *The Smart correction's aim is to make difference between a U-turn and a collision, what is'n an easy task
+             * The speed vector always rotate in 180* so I need data somewhere else:Position->real speed(with a little delay)
+             * I observed 2 things.
+             * 1:On collision, the speed decreases
+             * 2:On taking U-turn, the real velocity vector and the minecart.getVelocity() are ~perpendicular
+             *              :D          Don't give up!!! (message to everyone, who read my code)
+             */
+
             Vec3d vec3d = minecart.getPositionVec();
             if(lastCoord != null){
                 Vec3d velocity = new Vec3d(vec3d.x - lastCoord.x, 0, vec3d.z - lastCoord.z);
