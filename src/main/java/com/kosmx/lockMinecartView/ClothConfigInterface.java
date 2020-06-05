@@ -21,6 +21,7 @@ public class ClothConfigInterface {
         ConfigEntryBuilder threshold = builder.entryBuilder();
         ConfigEntryBuilder rollerCoasterMode = builder.entryBuilder();
         ConfigEntryBuilder enabled = builder.entryBuilder();
+        ConfigEntryBuilder showDebug = builder.entryBuilder();
 
         general.addEntry(smoothMode
                                  .startBooleanToggle("Smooth rotation mode", LockViewConfig.smoothMode.get())
@@ -51,6 +52,12 @@ public class ClothConfigInterface {
                                  .setDefaultValue(true)
                                  .setTooltip("spenceregilbert asked me, to add this entry")
                                  .setSaveConsumer(newValue -> LockViewConfig.enableByDefault.set(newValue))
+                                 .build());
+        general.addEntry(enabled
+                                 .startBooleanToggle("Show debug info in F3 screen", LockViewConfig.enableByDefault.get())
+                                 .setDefaultValue(false)
+                                 .setTooltip("and toggle text debug info")
+                                 .setSaveConsumer(newValue -> LockViewConfig.showDebug.set(newValue))
                                  .build());
         //Screen screen = builder.build();
         return builder;

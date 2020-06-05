@@ -8,6 +8,7 @@ public class LockViewConfig {
     public static ForgeConfigSpec.IntValue threshold;
     public static ForgeConfigSpec.BooleanValue rollerCoasterMode;
     public static ForgeConfigSpec.BooleanValue enableByDefault;
+    public static ForgeConfigSpec.BooleanValue showDebug;
 
     public static void init(ForgeConfigSpec.Builder client){
 
@@ -17,5 +18,6 @@ public class LockViewConfig {
         threshold = client.comment("SRotation reset treshold").defineInRange("vml.threshold", 8, 0, 80);
         rollerCoasterMode = client.comment("Roller-Coaster mode").define("vml.rollercoaster", false);
         enableByDefault = client.comment("Enable on start game").define("vml.enablebydefault", false);
+        showDebug = client.comment("Show debug info in F3 screen").define("vml.debug", false);
     }
 }

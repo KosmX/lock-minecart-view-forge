@@ -1,52 +1,124 @@
 package com.kosmx.lockMinecartView;
 
-/*import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import com.google.common.collect.Lists;
+/*
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry;
-import net.fabricmc.fabric.api.event.client.ClientTickCallback;     fabric api- not forge
-*/
+import net.fabricmc.fabric.api.event.client.ClientTickCallback;*/      //Fabric, not Forge
 import net.minecraft.entity.item.minecart.MinecartEntity;
+//import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.Nullable;
 
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.glfw.GLFW;
+
+//import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
+//import me.sargunvohra.mcmods.autoconfig1u.serializer.GsonConfigSerializer;     Fabric Modmenu
+
+import java.util.List;
 
 import static com.kosmx.lockMinecartView.lockMinecartView.keyBinding;
 
+//This class contains all code...
+//Originally for Fabric loader
 
 public class LockViewClient{
 
     //-------------system variables--------------------
     private static boolean isHeld = false;
-    public static boolean enabled = true;
+    //public static LockViewConfig config;
+    public static boolean enabled;
     public static Logger LOGGER = LogManager.getLogger();
     public static final String MOD_ID = "lock_minecart_view";
-    public static final String MOD_NAME = "Lock Minecart view";
+    public static final String MOD_NAME = "Better Minecart rotation"; //To be correct
     //-------------calculating vars--------------------
-    public static float yaw = 0f;
+    private static float yaw = 0f;
     //public static float pitch = 0f;
     private static boolean doCorrection;
+
+    //posVelocity is from position's change -- real, big delay
+    //gotVelocity is from Minecart.getMotion()() -- represents rail's direction, immediate
+    @Nullable
+    private static Vec3d gotVelocity = null;
+    @Nullable
+    private static Vec3d posVelocity = null;
+
     @Nullable
     private static Vec3d lastCoord = null;
     private static float lastYaw = 0f;
     private static Vec3d lastVelocity;
     private static float rawLastYaw;
     private static float rawYaw;
-    public static int tickAfterLastFollow = 0;
+    private static int tickAfterLastFollow = 0;
+    private static int tickAfterPistonRail;
+    private static int pistorRailTick = 0;
     private static float difference;
     private static int lastSlowdown = 0;
 
+
+    //-----------------CORE METHOD-----------------------
+
+    public static void update(MinecartEntity minecart){
+        lastYaw = yaw;
+        boolean update = setMinecartDirection(minecart);
+        if (tickAfterLastFollow++ > LockViewConfig.threshold.get()){
+            lastYaw = yaw;
+        }
+        else if(doCorrection){
+            lastYaw = normalize(lastYaw + 180f);
+        }
+        doCorrection = false;
+        if(update) tickAfterLastFollow = 0;
+        difference = normalize(yaw - lastYaw);
+    }
+
+    public static boolean setMinecartDirection(MinecartEntity minecart){
+        boolean update = false;
+        float yawF = rawYaw;
+        boolean correction = false;
+        boolean successUpdate = updateSmartCorrection(minecart);
+        if (minecart.getMotion().lengthSquared()>0.000002f) {
+            if (tickAfterPistonRail != LockViewConfig.threshold.get()) tickAfterPistonRail++;
+            yawF = sphericalFromVec3d(minecart.getMotion());
+            update = true;
+            correction = true;
+            if(pistorRailTick != 0)pistorRailTick--;
+        }
+        else if(minecart.getMotion().lengthSquared() == 0f && successUpdate && posVelocity.lengthSquared() > 0.02f){
+            if(pistorRailTick != LockViewConfig.threshold.get()){
+                pistorRailTick++;
+            }
+            else {
+                tickAfterPistonRail = 0;
+            }
+            yawF = getEighthDirection(sphericalFromVec3d(posVelocity));
+            update = true;
+        }
+        else {
+            if(pistorRailTick != 0)pistorRailTick--;
+        }
+
+        rawLastYaw = rawYaw;
+        rawYaw = yawF;
+        if(correction){
+            checkSmartCorrection(minecart, successUpdate);
+        }
+        setMinecartDirection(yawF);
+        return update;
+    }
     //-------------methods-----------------------------
 
-    public static float sphericalFromVec3d(Vec3d vec3d){
+
+
+
+    private static float sphericalFromVec3d(Vec3d vec3d){
         //float f = MathHelper.sqrt(Entity.squaredHorizontalLength(vec3d));
         //pitch = (float)(MathHelper.atan2(vec3d.y, (double)f) * 57.2957763671875D);
         return (float)(MathHelper.atan2(-vec3d.x, vec3d.z) * 57.2957763671875D);
@@ -57,104 +129,87 @@ public class LockViewClient{
         tickAfterLastFollow = 100;
         lastVelocity = Vec3d.ZERO;
         lastSlowdown = 100;
+        tickAfterPistonRail = LockViewConfig.threshold.get();
+        pistorRailTick = 0;
         return !enabled;
     }
 
-    public static void setMinecartDirection(float yawF){
+    private static void setMinecartDirection(float yawF){
         if (LockViewConfig.smoothMode.get()){
             if(!LockViewConfig.rollerCoasterMode.get() && tickAfterLastFollow > LockViewConfig.threshold.get()){
-                LockViewClient.yaw = yawF;
+                yaw = yawF;
             }
             else if(doCorrection){
-                LockViewClient.yaw = normalize(LockViewClient.yaw + 180f);
+                yaw = normalize(yaw + 180f);
             }
-            if (Math.abs(yawF - LockViewClient.yaw) < 180f){
-                LockViewClient.yaw = LockViewClient.yaw/2 + yawF/2;
+            if (Math.abs(yawF - yaw) < 180f){
+                yaw = yaw/2 + yawF/2;
             }
             else{
-                float tmp = LockViewClient.yaw/2 + yawF/2;
-                //log(Level.INFO, Float.toString(LockViewClient.yaw));
-                LockViewClient.yaw = (tmp >= 0) ? tmp - 180f : tmp + 180f;
+                float tmp = yaw/2 + yawF/2;
+                //log(Level.INFO, Float.toString(yaw));
+                yaw = (tmp >= 0) ? tmp - 180f : tmp + 180f;
             }
-            //log(Level.INFO, Float.toString(LockViewClient.yaw));
+            //log(Level.INFO, Float.toString(yaw));
         }
         else{
-            LockViewClient.yaw = yawF;
+            yaw = yawF;
         }
     }
 
-    public static void setMinecartDirection(MinecartEntity minecart){
-        float yawF = sphericalFromVec3d(minecart.getMotion());
-        LockViewClient.rawLastYaw = LockViewClient.rawYaw;
-        LockViewClient.rawYaw = yawF;
-        checkSmartCorrection(minecart);
-        setMinecartDirection(yawF);
-    }
 
-    public static void setMinecartDirection(Vec3d vec3d){
-        setMinecartDirection(sphericalFromVec3d(vec3d));
-    }
-
-    public static void smartCalc(MinecartEntity minecart){
-        LockViewClient.lastYaw = LockViewClient.yaw;
-        boolean update = false;
-        if (minecart.getMotion().lengthSquared()>0.000002f){
-            update = true;
-            setMinecartDirection(minecart);
-            //log(Level.INFO, Float.toString(LockViewClient.yaw - LockViewClient.lastYaw));
-        }
-        if (LockViewClient.tickAfterLastFollow++ >= LockViewConfig.threshold.get()){
-            LockViewClient.lastYaw = LockViewClient.yaw;
-            //log(Level.INFO, "clear rotation" + Integer.toString(tickAfterLastFollow) + " : " + Boolean.toString(update));
-        }
-        else if(doCorrection){
-            LockViewClient.lastYaw = normalize(LockViewClient.lastYaw + 180f);
-            //log(Level.INFO, "do smart correction");
-        }
-        doCorrection = false;
-        if(update) LockViewClient.tickAfterLastFollow = 0;
-        LockViewClient.difference = LockViewClient.yaw - LockViewClient.lastYaw;
-    }
-
-    private static void checkSmartCorrection(MinecartEntity minecart){
+    private static void checkSmartCorrection(MinecartEntity minecart, boolean successUpdate){
         boolean correction = false;
         if(LockViewConfig.smartMode.get()){
-            float ang = 60;
-            if (Math.abs(LockViewClient.rawLastYaw - LockViewClient.rawYaw) > 180f-ang && Math.abs(LockViewClient.rawLastYaw - LockViewClient.rawYaw)<180+ang){
+            float ang = 60f;
+            if (tickAfterPistonRail == LockViewConfig.threshold.get() && floatCircleDistance(rawLastYaw, rawYaw, 360) > 180f-ang && floatCircleDistance(rawLastYaw, rawYaw, 360) <180+ang) {
                 correction = true;
-            }
-            /*-------------------Explain, what does the following complicated code------------------------
-             *The Smart correction's aim is to make difference between a U-turn and a collision, what is'n an easy task
-             * The speed vector always rotate in 180* so I need data somewhere else:Position->real speed(with a little delay)
-             * I observed 2 things.
-             * 1:On collision, the speed decreases
-             * 2:On taking U-turn, the real velocity vector and the minecart.getVelocity() are ~perpendicular
-             *              :D          Don't give up!!! (message to everyone, who read my code)
-             */
-
-            Vec3d vec3d = minecart.getPositionVec();
-            if(lastCoord != null){
-                Vec3d velocity = new Vec3d(vec3d.x - lastCoord.x, 0, vec3d.z - lastCoord.z);
-                if(lastVelocity == null) lastVelocity = new Vec3d(0, 0, 0);
-                Vec3d velocity2d = new Vec3d(minecart.getMotion().getX(), 0, minecart.getMotion().getZ());
-                //log(Level.INFO, Double.toString(velocity2d.lengthSquared() - velocity.lengthSquared()));
-                //log(Level.INFO, velocity.lengthSquared() + " : " + lastVelocity.lengthSquared());
-                if( velocity2d.length() != 0 && lastVelocity.length()/velocity2d.length() > 2.4d) lastSlowdown = 0;
-                boolean bl1 = correction && velocity.lengthSquared() > 0.000008f && Math.abs(velocity.normalize().dotProduct(velocity2d.normalize())) < 0.8f;//vectors dot product ~0, if vectors are ~perpendicular to each other
-                boolean bl2 = (!bl1) || lastSlowdown++ < LockViewConfig.threshold.get() && Math.abs(velocity.normalize().dotProduct(velocity2d.normalize())) < 0.866f && velocity2d.lengthSquared() < 0.32;
-                if(bl1 && !bl2) {
-                    correction = false;
+                /*-------------------Explain, what does the following complicated code------------------------
+                 *The Smart correction's aim is to make difference between a U-turn and a collision, what is'n an easy task
+                 * The speed vector always rotate in 180* so I need data from somewhere else:Position->real speed(with a little delay)
+                 * I observed 2 things:
+                 * 1:On collision, the speed decreases (gotVelocity)
+                 * 2:On taking U-turn, the real velocity vector and the minecart.getMotion()() are ~perpendicular
+                 *
+                 * fix to piston rail-
+                 * while travelling on piston-rail
+                 * gotVelocity = zero
+                 * posVelocity always real (while euclidean space isn't broken)
+                 *
+                 *              :D          Don't give up!!! (message to everyone, who read my code)
+                 */
+                log(Level.INFO, "initCorrection");
+                if (successUpdate) {
+                    boolean bl1 = posVelocity.lengthSquared() > 0.00004f && Math.abs(posVelocity.normalize().dotProduct(gotVelocity.normalize())) < 0.8f;//vectors dot product ~0, if vectors are ~perpendicular to each other
+                    boolean bl2 = (!bl1) || lastSlowdown < LockViewConfig.threshold.get() && Math.abs(posVelocity.normalize().dotProduct(gotVelocity.normalize())) < 0.866f && gotVelocity.lengthSquared() < 0.32;
+                    if (bl1 && !bl2) {
+                        correction = false;
+                        log(Level.INFO, "correction cancelled");
+                    }
                 }
-                lastVelocity = velocity2d;
             }
-            lastCoord = vec3d;
         }
-        LockViewClient.doCorrection = correction;
+        doCorrection = correction;
+    }
+
+    private static boolean updateSmartCorrection(MinecartEntity minecart){
+        boolean success = lastCoord != null;
+        Vec3d pos = minecart.getPositionVec();
+        if(success) {
+            posVelocity = new Vec3d(pos.x - lastCoord.x, 0, pos.z - lastCoord.z);
+            lastVelocity = (gotVelocity == null) ? new Vec3d(0, 0, 0) : gotVelocity;
+            gotVelocity = new Vec3d(minecart.getMotion().getX(), 0, minecart.getMotion().getZ());
+            if( gotVelocity.length() != 0 && lastVelocity.length()/gotVelocity.length() > 2.4d) lastSlowdown = 0;
+            ++lastSlowdown;
+        }
+        lastCoord = pos;
+        return success;
     }
 
     public static float calcYaw(float entityYaw){
-        //log(Level.INFO, Float.toString(LockViewClient.difference));
-        return entityYaw + LockViewClient.difference;
+        //log(Level.INFO, Float.toString(difference));
+        return (LockViewConfig.rollerCoasterMode.get()) ? (entityYaw + normalize(yaw - entityYaw)) : (entityYaw + difference);
+        //return entityYaw + difference;
     }
 
 
@@ -162,42 +217,84 @@ public class LockViewClient{
         return (Math.abs(f) > 180) ? (f < 0) ? f + 360f : f - 360f : f;
     }
 
+    private static float getEighthDirection(Float f){
+        if(floatCircleDistance(f%90 , 0, 90) < 20){
+            return ((float)Math.round(f/90))*90;
+        }
+        else return f;
+    }
 
-    //-------------control key variables---------------
-    
+    private static float floatCircleDistance(float i1, float i2, float size){
+        float dist1 = Math.abs(i1-i2);
+        float dist2 = Math.abs(dist1 - size);
+        return Math.min(dist1, dist2);
+    }
+
+
+    //-------------Mod initializer & debug-----------------
+
+    public static List<String> getDebug(){
+        List<String> list = Lists.newArrayList();
+        list.add(MOD_NAME + " debug info - can be turned off");
+        boolean bl1 = false;
+        boolean bl2 = false;
+        if(gotVelocity != null) {
+            bl1 = true;
+            list.add("\"fake\" velocity: " + gotVelocity.length());
+        }
+        if(posVelocity != null){
+            list.add("real velocity: " + posVelocity.length());
+            if(posVelocity.length() > 0.00000001) bl2 = true;
+        }
+        if(bl1 && bl2){
+            list.add("quotient(fake/real): " + gotVelocity.length()/posVelocity.length());
+        }
+        else list.add("quotient(fake/real): ∞");
+        list.add("minecart's yaw: " + rawYaw);
+        list.add("Last slowdown (collision): " + lastSlowdown);
+        list.add("Last success update: " + tickAfterLastFollow);
+        list.add("Last piston belt rail: " + tickAfterPistonRail + " CD: " + pistorRailTick);
+        return list;
+    }
 
     /*@Override
     public void onInitializeClient() {
-        log(Level.INFO, "Initializing");
-        AutoConfig.register(LockViewConfig.class, GsonConfigSerializer::new);
-        config = AutoConfig.getConfigHolder(LockViewConfig.class).getConfig();
+        log(Level.INFO, "Initializing", true);
+
+        //setup Config
+        AutoLockViewConfig.register(LockViewLockViewConfig.class, GsonConfigSerializer::new);
+        config = AutoLockViewConfig.getConfigHolder(LockViewLockViewConfig.class).getConfig();
+        enabled = LockViewConfig.enabled;
+
+
+        //setup key
         keyBinding = FabricKeyBinding.Builder.create(
-            new Identifier(MOD_ID, "toggle"), 
-            net.minecraft.client.util.InputUtil.Type.KEYSYM, 
-            GLFW.GLFW_KEY_F7, 
-            MOD_NAME
-        ).build();
+                new Identifier(MOD_ID, "toggle"),
+                net.minecraft.client.util.InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_F7,
+                MOD_NAME
+        ).build();          //pre-create key
         KeyBindingRegistry.INSTANCE.addCategory(MOD_NAME);
-        KeyBindingRegistry.INSTANCE.register(keyBinding);
-        ClientTickCallback.EVENT.register(e ->
-        */
-        //@SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
-        public static void keyEvent(InputEvent.KeyInputEvent e)
-        {
-            //LOGGER.info("spam");
-            if (keyBinding.isKeyDown()){
-                if(isHeld)return;
-                isHeld = true;
-                enabled = onStartRiding();
-            }
-            else if (isHeld){
-                isHeld = false;
-            }
-        }/*);
+        KeyBindingRegistry.INSTANCE.register(keyBinding);   //register key
+        ClientTickCallback.EVENT.register(e ->*/
+    public static void keyEvent(InputEvent.KeyInputEvent e)
+                                          {
+                                              if (keyBinding.isPressed()){
+                                                  if(isHeld)return;
+                                                  isHeld = true;
+                                                  enabled = onStartRiding();
+                                              }
+                                              else if (isHeld){
+                                                  isHeld = false;
+                                              }
+                                          }/*);
     }
-    //net.minecraft.client.render.item.HeldItemRenderer
+    //net.minecraft.client.render.item.HeldItemRenderer*/
+    public static void log(Level level, String message, boolean always){
+        if (always || LockViewConfig.showDebug.get()) LOGGER.log(level, "[" + MOD_NAME + "] " + message);
+    }
     public static void log(Level level, String message){
-        LOGGER.log(level, "["+MOD_NAME+"] " + message);
-    }*/
+        log(level, message, false);
+    }
 
 }

@@ -37,18 +37,9 @@ public class ClientPlayerMixin extends AbstractClientPlayerEntity{
              *There is NO way in mc to get the minecart's yaw...
              *I need to create any identifier method (from the speed)
              */
-            if(LockViewConfig.rollerCoasterMode.get() && vehicle.getMotion().lengthSquared()>0.000001f){
-                LockViewClient.setMinecartDirection(minecart.getMotion());
-                //this.setHeadYaw(LockViewClient.yaw);       //only camera
-                this.rotationYaw = LockViewClient.yaw;
-                //this.renderArmYaw = LockViewClient.yaw;    //Only client side
-                //this.pitch = LockViewClient.pitch;
-            }
-            else{
-                LockViewClient.smartCalc(minecart);
-                this.rotationYaw = LockViewClient.calcYaw(this.rotationYaw);
-                //this.bodyYaw = LockViewClient.calcYaw(this.bodyYaw);
-            }
+            LockViewClient.update(minecart);
+            this.rotationYaw = LockViewClient.calcYaw(this.rotationYaw);
+            //this.bodyYaw = LockViewClient.calcYaw(this.bodyYaw);
             //this.lastRenderYaw += LockViewClient.correction;
             //this.renderYaw += LockViewClient.correction;
             //this.sendMovementPackets();
@@ -60,7 +51,7 @@ public class ClientPlayerMixin extends AbstractClientPlayerEntity{
         target = "Lnet/minecraft/client/Minecraft;getSoundHandler()Lnet/minecraft/client/audio/SoundHandler;"))
     private void startRidingInject(Entity entity, boolean force, CallbackInfoReturnable<Object> info){
         //net.minecraft.client.network.ClientPlayerEntity
-        LOGGER.info("entering minecart");
+        LockViewClient.log(Level.INFO, "entering minecart");
         LockViewClient.onStartRiding();
     }
     

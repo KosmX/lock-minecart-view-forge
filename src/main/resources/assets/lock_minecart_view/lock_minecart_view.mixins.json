@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "lock_minecart_view.refmap.json",
   "mixins": [
-    "ClientPlayerMixin"
+    "ClientPlayerMixin",
+    "DebugHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1
