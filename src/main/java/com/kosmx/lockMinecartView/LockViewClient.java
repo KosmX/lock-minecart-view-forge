@@ -9,10 +9,10 @@ import net.fabricmc.fabric.api.event.client.ClientTickCallback;*/      //Fabric,
 import net.minecraft.entity.item.minecart.MinecartEntity;
 //import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.client.event.InputEvent;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -46,14 +46,14 @@ public class LockViewClient{
     //posVelocity is from position's change -- real, big delay
     //gotVelocity is from Minecart.getMotion()() -- represents rail's direction, immediate
     @Nullable
-    private static Vec3d gotVelocity = null;
+    private static Vector3d gotVelocity = null;
     @Nullable
-    private static Vec3d posVelocity = null;
+    private static Vector3d posVelocity = null;
 
     @Nullable
-    private static Vec3d lastCoord = null;
+    private static Vector3d lastCoord = null;
     private static float lastYaw = 0f;
-    private static Vec3d lastVelocity;
+    private static Vector3d lastVelocity;
     private static float rawLastYaw;
     private static float rawYaw;
     private static int tickAfterLastFollow = 0;
@@ -86,7 +86,7 @@ public class LockViewClient{
         boolean successUpdate = updateSmartCorrection(minecart);
         if (minecart.getMotion().lengthSquared()>0.000002f) {
             if (tickAfterPistonRail != LockViewConfig.threshold.get()) tickAfterPistonRail++;
-            yawF = sphericalFromVec3d(minecart.getMotion());
+            yawF = sphericalFromVector3d(minecart.getMotion());
             update = true;
             correction = true;
             if(pistorRailTick != 0)pistorRailTick--;
@@ -98,7 +98,7 @@ public class LockViewClient{
             else {
                 tickAfterPistonRail = 0;
             }
-            yawF = getEighthDirection(sphericalFromVec3d(posVelocity));
+            yawF = getEighthDirection(sphericalFromVector3d(posVelocity));
             update = true;
         }
         else {
@@ -118,7 +118,7 @@ public class LockViewClient{
 
 
 
-    private static float sphericalFromVec3d(Vec3d vec3d){
+    private static float sphericalFromVector3d(Vector3d vec3d){
         //float f = MathHelper.sqrt(Entity.squaredHorizontalLength(vec3d));
         //pitch = (float)(MathHelper.atan2(vec3d.y, (double)f) * 57.2957763671875D);
         return (float)(MathHelper.atan2(-vec3d.x, vec3d.z) * 57.2957763671875D);
@@ -127,7 +127,7 @@ public class LockViewClient{
     public static boolean onStartRiding(){
         lastCoord = null;
         tickAfterLastFollow = 100;
-        lastVelocity = Vec3d.ZERO;
+        lastVelocity = Vector3d.ZERO;
         lastSlowdown = 100;
         tickAfterPistonRail = LockViewConfig.threshold.get();
         pistorRailTick = 0;
@@ -194,11 +194,11 @@ public class LockViewClient{
 
     private static boolean updateSmartCorrection(MinecartEntity minecart){
         boolean success = lastCoord != null;
-        Vec3d pos = minecart.getPositionVec();
+        Vector3d pos = minecart.getPositionVec();
         if(success) {
-            posVelocity = new Vec3d(pos.x - lastCoord.x, 0, pos.z - lastCoord.z);
-            lastVelocity = (gotVelocity == null) ? new Vec3d(0, 0, 0) : gotVelocity;
-            gotVelocity = new Vec3d(minecart.getMotion().getX(), 0, minecart.getMotion().getZ());
+            posVelocity = new Vector3d(pos.x - lastCoord.x, 0, pos.z - lastCoord.z);
+            lastVelocity = (gotVelocity == null) ? new Vector3d(0, 0, 0) : gotVelocity;
+            gotVelocity = new Vector3d(minecart.getMotion().getX(), 0, minecart.getMotion().getZ());
             if( gotVelocity.length() != 0 && lastVelocity.length()/gotVelocity.length() > 2.4d) lastSlowdown = 0;
             ++lastSlowdown;
         }

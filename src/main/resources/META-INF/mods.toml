@@ -34,9 +34,9 @@ When you turn with minecart, but you still look to the last direction and you wa
 :D
 '''
       [[dependencies.lock_minecart_view]]
-        modId="cloth-config2"
+        modId="cloth-config"
         mandatory=true
-        versionRange="[3.0,)"
+        versionRange="[4.0,)"
         ordering="NONE"
         side="BOTH"
 

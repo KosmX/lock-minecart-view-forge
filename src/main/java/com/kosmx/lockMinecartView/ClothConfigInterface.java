@@ -1,10 +1,11 @@
 package com.kosmx.lockMinecartView;
 
 
-import me.shedaniel.forge.clothconfig2.api.ConfigBuilder;
-import me.shedaniel.forge.clothconfig2.api.ConfigCategory;
-import me.shedaniel.forge.clothconfig2.api.ConfigEntryBuilder;
+import me.shedaniel.clothconfig2.forge.api.ConfigBuilder;
+import me.shedaniel.clothconfig2.forge.api.ConfigCategory;
+import me.shedaniel.clothconfig2.forge.api.ConfigEntryBuilder;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class ClothConfigInterface {
@@ -14,7 +15,7 @@ public class ClothConfigInterface {
 
         ConfigBuilder builder = ConfigBuilder.create();
 
-        ConfigCategory general = builder.getOrCreateCategory("general menu");
+        ConfigCategory general = builder.getOrCreateCategory(translateText("Lock MinecartView Config"));
 
         ConfigEntryBuilder smoothMode = builder.entryBuilder();
         ConfigEntryBuilder smartMode = builder.entryBuilder();
@@ -24,44 +25,60 @@ public class ClothConfigInterface {
         ConfigEntryBuilder showDebug = builder.entryBuilder();
 
         general.addEntry(smoothMode
-                                 .startBooleanToggle("Smooth rotation mode", LockViewConfig.smoothMode.get())
+                                 .startBooleanToggle(translateText("Smooth rotation mode"), LockViewConfig.smoothMode.get())
                                  .setDefaultValue(true)
-                                 .setTooltip(":D")
+                                 .setTooltip(translateTextTooltip(":D"))
                                  .setSaveConsumer(newValue -> LockViewConfig.smoothMode.set(newValue))
                                  .build());
         general.addEntry(smartMode
-                                 .startBooleanToggle("Smart mode (hint)", LockViewConfig.smartMode.get())
+                                 .startBooleanToggle(translateText("Smart mode (hint)"), LockViewConfig.smartMode.get())
                                  .setDefaultValue(true)
-                                 .setTooltip("Don't rotate when crash into something and start moving in opposite direction")
+                                 .setTooltip(translateTextTooltip("Don't rotate when crash into something and start moving in opposite direction"))
                                  .setSaveConsumer(newValue -> LockViewConfig.smartMode.set(newValue))
                                  .build());
         general.addEntry(threshold
-                                 .startIntSlider("Rotation reset treshold", LockViewConfig.threshold.get(), 0, 80)
+                                 .startIntSlider(translateText("Rotation reset treshold"), LockViewConfig.threshold.get(), 0, 80)
                                  .setDefaultValue(8)
-                                 .setTooltip("Smart mode's sub-option, try changing it's value. 20 tick is 1 second")
+                                 .setTooltip(translateTextTooltip("Smart mode's sub-option, try changing it's value. 20 tick is 1 second"))
                                  .setSaveConsumer(newValue -> LockViewConfig.threshold.set(newValue))
                                  .build());
         general.addEntry(rollerCoasterMode
-                                 .startBooleanToggle("Roller Coaster mode", LockViewConfig.rollerCoasterMode.get())
+                                 .startBooleanToggle(translateText("Roller Coaster mode"), LockViewConfig.rollerCoasterMode.get())
                                  .setDefaultValue(false)
-                                 .setTooltip("Enforce to look forward. Smart mode has no effect, if turned on")
+                                 .setTooltip(translateTextTooltip("Enforce to look forward. Smart mode has no effect, if turned on"))
                                  .setSaveConsumer(newValue -> LockViewConfig.rollerCoasterMode.set(newValue))
                                  .build());
         general.addEntry(enabled
-                                 .startBooleanToggle("Enable mod on starting the game", LockViewConfig.enableByDefault.get())
+                                 .startBooleanToggle(translateText("Enable mod on starting the game"), LockViewConfig.enableByDefault.get())
                                  .setDefaultValue(true)
-                                 .setTooltip("spenceregilbert asked me, to add this entry")
+                                 .setTooltip(translateTextTooltip("spenceregilbert asked me, to add this entry"))
                                  .setSaveConsumer(newValue -> LockViewConfig.enableByDefault.set(newValue))
                                  .build());
         general.addEntry(enabled
-                                 .startBooleanToggle("Show debug info in F3 screen", LockViewConfig.enableByDefault.get())
+                                 .startBooleanToggle(translateText("Show debug info in F3 screen"), LockViewConfig.enableByDefault.get())
                                  .setDefaultValue(false)
-                                 .setTooltip("and toggle text debug info")
+                                 .setTooltip(translateTextTooltip("and toggle text debug info"))
                                  .setSaveConsumer(newValue -> LockViewConfig.showDebug.set(newValue))
                                  .build());
         //Screen screen = builder.build();
         return builder;
     }
 
+    /*private static TranslationTextComponent translateText(String msg){
+        return new TranslationTextComponent( "text.autoconfig." + LockViewClient.MOD_ID + "." + msg);
+    }
+
+    private static TranslationTextComponent translateTextTooltip(String msg){
+        return translateText(msg + ".@Tooltip");
+    }
+
+     */
+
+    private static TranslationTextComponent translateText(String msg){
+        return new TranslationTextComponent(msg);
+    }
+    private static TranslationTextComponent translateTextTooltip(String msg){
+        return new TranslationTextComponent(msg);
+    }
 
 }
