@@ -1,8 +1,18 @@
 package com.kosmx.lockMinecartView;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.config.Config;
 
+@Config(modid = LockViewClient.MOD_ID)
 public class LockViewConfig {
+    public static boolean smoothMode = true;
+    public static boolean smartMode = true;
+    @Config.RangeInt(min = 0, max = 80)
+    public static int threshold = 8;
+    public static boolean rollerCoasterMode = false;
+    public static boolean enableByDefault = true;
+    public static boolean showDebug = false;
+
+    /*
     public static ForgeConfigSpec.BooleanValue smoothMode;
     public static ForgeConfigSpec.BooleanValue smartMode;
     public static ForgeConfigSpec.IntValue threshold;
@@ -20,4 +30,6 @@ public class LockViewConfig {
         enableByDefault = client.comment("Enable on start game").define("vml.enablebydefault", true);
         showDebug = client.comment("Show debug info in F3 screen").define("vml.debug", false);
     }
+
+     */
 }

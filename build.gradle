@@ -102,7 +102,7 @@ dependencies {
     // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
     // compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
 
-    compile files("cloth-config-forge-4.0.1.jar")  //trying to create in-game config and finish v1.*
+    //compile files("cloth-config-forge-4.0.1.jar")  //trying to create in-game config and finish v1.*
 
     // The 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
     // provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'

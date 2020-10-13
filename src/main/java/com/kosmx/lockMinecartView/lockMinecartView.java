@@ -1,24 +1,16 @@
 package com.kosmx.lockMinecartView;
 
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ExtensionPoint;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.glfw.GLFW;
 
 // The value here should match an entry in the META-INF/mods.toml file
-@Mod("lock_minecart_view")
+@Mod(modid = LockViewClient.MOD_ID, name = LockViewClient.MOD_NAME, version = "1.2.0")
 public class lockMinecartView
 {
     // Directly reference a log4j logger.
@@ -26,7 +18,7 @@ public class lockMinecartView
 
     public static KeyBinding keyBinding;
 
-    public lockMinecartView() {
+    /*public lockMinecartView() {
 
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::warn);  //try to warn, if the mod is in the server's mods folder
@@ -38,6 +30,8 @@ public class lockMinecartView
         MinecraftForge.EVENT_BUS.register(this);
     }
 
+
+
     private  void warn(final FMLDedicatedServerSetupEvent event){
         //Do DedicatedServer stuff: create a crash :D
         LOGGER.error("Better minecart rotation is Client ONLY!!! :D");
@@ -45,27 +39,30 @@ public class lockMinecartView
 
     //private void preInit(FML)
 
-    private void doClientStuff(final FMLClientSetupEvent event) {
-        isMixinIn();
+
+     */
+    @Mod.EventHandler
+    private void doClientStuff(FMLInitializationEvent event) {
+        //isMixinIn();
         // do something that can only be done on the client
-        keyBinding = new KeyBinding("toggle", GLFW.GLFW_KEY_F7, "Better minecart");
+        keyBinding = new KeyBinding("toggle", 118, "Better minecart");
 
         ClientRegistry.registerKeyBinding(keyBinding);
 
         //FMLJavaModLoadingContext.get().getModEventBus().addListener(LockViewClient::keyEvent);
         MinecraftForge.EVENT_BUS.register(new keyInputHandler());
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, LockViewMenu.config);
+        //ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, LockViewMenu.config);
 
-        LockViewMenu.loadConfig(LockViewMenu.config, FMLPaths.CONFIGDIR.get().resolve("lock_minecart_view.toml").toString());
-        LockViewClient.enabled = LockViewConfig.enableByDefault.get();
+        //LockViewMenu.loadConfig(LockViewMenu.config, FMLPaths.CONFIGDIR.get().resolve("lock_minecart_view.toml").toString());
+        //LockViewClient.enabled = LockViewConfig.enableByDefault.get();
 
         //DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> new ClothConfigInterface());
-        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (client, parent) -> {
-            return ClothConfigInterface.getClothConfigInterface().build();
-        });
+        //ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (client, parent) -> {
+            //return ClothConfigInterface.getClothConfigInterface().build();
+        //});
 
-        LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
+        //LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
     }
 
     private void isMixinIn(){
@@ -73,7 +70,7 @@ public class lockMinecartView
             Class.forName("org.spongepowered.asm.launch.Phases");
         }
         catch (ClassNotFoundException e) {
-            LOGGER.fatal("MixinBootstrap not found :( did you download it? \n https://www.curseforge.com/minecraft/mc-mods/mixinbootstrap");
+            LOGGER.fatal("[lock-minecaft-view] MixinBootstrap not found :( did you download it? \n https://www.curseforge.com/minecraft/mc-mods/mixinbootstrap");
         }
     }
 

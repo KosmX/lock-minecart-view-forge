@@ -1,4 +1,4 @@
-package com.kosmx.lockMinecartView;
+/*package com.kosmx.lockMinecartView;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
@@ -24,3 +24,6 @@ public class LockViewMenu {
         config.setConfig(file);
     }
 }
+
+
+ */

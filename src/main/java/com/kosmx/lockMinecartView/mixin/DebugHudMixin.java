@@ -1,4 +1,4 @@
-package com.kosmx.lockMinecartView.mixin;
+/*package com.kosmx.lockMinecartView.mixin;
 
 import com.kosmx.lockMinecartView.LockViewClient;
 import com.kosmx.lockMinecartView.LockViewConfig;
@@ -25,3 +25,6 @@ public class DebugHudMixin extends AbstractGui {
         }
     }
 }
+
+
+ */
