@@ -16,7 +16,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.2.0'
+version = '1.2.1'
 group = 'com.kosmx.lockMinecartView' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'lock_minecart_view'
 
@@ -111,7 +111,7 @@ dependencies {
     // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
     //Mixin
-    compile 'org.spongepowered:mixin:0.8.1-SNAPSHOT'
+    //compile 'org.spongepowered:mixin:0.8.1-SNAPSHOT'
 
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
@@ -130,7 +130,7 @@ jar {
             "Implementation-Version": "${version}",
             "Implementation-Vendor" :"",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-            "MixinConnector" : "com.kosmx.lockMinecartView.MyMixinConnector"
+            //"MixinConnector" : "com.kosmx.lockMinecartView.MyMixinConnector"
         ])
     }
 }
@@ -158,7 +158,7 @@ publishing {
         }
     }
 }
-apply plugin: 'org.spongepowered.mixin'
+//apply plugin: 'org.spongepowered.mixin'
 repositories {
     maven { url = 'https://files.minecraftforge.net/maven' }
     jcenter()
@@ -167,7 +167,7 @@ repositories {
     maven {url='https://dist.creeper.host/Sponge/maven'}
 
 }
-mixin {
+/*mixin {
     add sourceSets.main, "lock_minecart_view.refmap.json"
     //add sourceSets.another, "another.refmap.json"
-}
+}*/

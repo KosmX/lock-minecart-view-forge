@@ -1,4 +1,4 @@
-package com.kosmx.lockMinecartView.mixin;
+/*package com.kosmx.lockMinecartView.mixin;
 
 import com.kosmx.lockMinecartView.LockViewClient;
 import com.mojang.authlib.GameProfile;
@@ -35,7 +35,7 @@ public class ClientPlayerMixin extends AbstractClientPlayer {
             /*Using MinecartEntity.getYaw() is unusable, becouse it's not the minecart's yaw...
              *There is NO way in mc to get the minecart's yaw...
              *I need to create any identifier method (from the speed)
-             */
+             /
             LockViewClient.update(minecart);
             this.rotationYaw = LockViewClient.calcYaw(this.rotationYaw);
             //this.bodyYaw = LockViewClient.calcYaw(this.bodyYaw);
@@ -55,3 +55,4 @@ public class ClientPlayerMixin extends AbstractClientPlayer {
     }
     
 }
+*/

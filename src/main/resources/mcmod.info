@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "lock_minecart_view",
+    "name": "Better Minecart Rotation",
+    "description": "When you turn with minecart, but you still look to the last direction and you want to change this, this mod is for you.",
+    "version": "1.2.1",
+    "mcversion": "1.12.2",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/better-minecart-rotation-forge",
+    "updateUrl": "",
+    "authorList": ["KosmX"],
+    "credits": "G.TEAM",
+    "logoFile": "icon.png",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

@@ -1,4 +1,4 @@
-package com.kosmx.lockMinecartView;
+/*package com.kosmx.lockMinecartView;
 
 import org.apache.logging.log4j.spi.LoggerRegistry;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,3 +13,4 @@ public class MyMixinConnector implements IMixinConnector {
         Mixins.addConfiguration("assets/lock_minecart_view/lock_minecart_view.mixins.json");
     }
 }
+*/

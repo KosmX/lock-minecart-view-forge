@@ -2,9 +2,12 @@ package com.kosmx.lockMinecartView;
 
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,15 +45,19 @@ public class lockMinecartView
 
      */
     @Mod.EventHandler
-    private void doClientStuff(FMLInitializationEvent event) {
+    public void doClientStuff(FMLInitializationEvent event) {
         //isMixinIn();
         // do something that can only be done on the client
-        keyBinding = new KeyBinding("toggle", 118, "Better minecart");
+        keyBinding = new KeyBinding("toggle", 65, "Better minecart");
 
         ClientRegistry.registerKeyBinding(keyBinding);
 
+
         //FMLJavaModLoadingContext.get().getModEventBus().addListener(LockViewClient::keyEvent);
         MinecraftForge.EVENT_BUS.register(new keyInputHandler());
+        MinecraftForge.EVENT_BUS.register(new ForgeEventAction());
+
+        LockViewClient.enabled = LockViewConfig.enableByDefault;
 
         //ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, LockViewMenu.config);
 
@@ -65,7 +72,7 @@ public class lockMinecartView
         //LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
     }
 
-    private void isMixinIn(){
+    /*private void isMixinIn(){
         try {
             Class.forName("org.spongepowered.asm.launch.Phases");
         }
@@ -73,6 +80,8 @@ public class lockMinecartView
             LOGGER.fatal("[lock-minecaft-view] MixinBootstrap not found :( did you download it? \n https://www.curseforge.com/minecraft/mc-mods/mixinbootstrap");
         }
     }
+
+     */
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     /*@SubscribeEvent
