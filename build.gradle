@@ -15,8 +15,9 @@ apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'org.spongepowered.mixin'
 
-version = '1.2.1'
+version = '1.2.2'
 group = 'com.kosmx.lockMinecartView' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'lock_minecart_view'
 
@@ -88,6 +89,20 @@ minecraft {
     }
 }
 
+configurations {
+    provided {
+        compile.extendsFrom(provided)
+    }
+}
+repositories {
+    maven { url = 'https://files.minecraftforge.net/maven' }
+    jcenter()
+    mavenCentral()
+
+    maven {url='https://dist.creeper.host/Sponge/maven'}
+
+}
+
 dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
@@ -111,16 +126,26 @@ dependencies {
     // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
     //Mixin
-    //compile 'org.spongepowered:mixin:0.8.1-SNAPSHOT'
+    compile 'org.spongepowered:mixin:0.8.1-SNAPSHOT'
 
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
+    provided('org.spongepowered:mixin:0.8.1-SNAPSHOT') {
+        exclude module: 'guava'
+        exclude module: 'commons-io'
+        exclude module: 'gson'
+    }
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
+    from(configurations.provided.collect {
+        it.isDirectory() ? it : zipTree(it)
+    }) {
+        exclude "LICENSE.txt", "META-INF/MANIFSET.MF", "META-INF/maven/**", "META-INF/*.RSA", "META-INF/*.SF"
+    }
+
     manifest {
         attributes([
             "Specification-Title": "Better minecart rotation",
@@ -130,7 +155,12 @@ jar {
             "Implementation-Version": "${version}",
             "Implementation-Vendor" :"",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-            //"MixinConnector" : "com.kosmx.lockMinecartView.MyMixinConnector"
+            "FMLCorePlugins" : "com.kosmx.lockMinecartView.mixinLoader",
+            "FMLCorePluginContainsFMLMod": "true",
+            "ForceLoadAsMod": "true",
+            "TweakClass": "org.spongepowered.asm.launch.MixinTweaker",
+            "TweakOrder": 0,
+            "MixinConfigs" : "lock_minecart_view.mixins.json"
         ])
     }
 }
@@ -159,15 +189,8 @@ publishing {
     }
 }
 //apply plugin: 'org.spongepowered.mixin'
-repositories {
-    maven { url = 'https://files.minecraftforge.net/maven' }
-    jcenter()
-    mavenCentral()
 
-    maven {url='https://dist.creeper.host/Sponge/maven'}
-
-}
-/*mixin {
+mixin {
     add sourceSets.main, "lock_minecart_view.refmap.json"
     //add sourceSets.another, "another.refmap.json"
-}*/
+}
