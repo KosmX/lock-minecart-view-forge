@@ -1,12 +1,10 @@
 package com.kosmx.lockMinecartView;
 
 
-import me.shedaniel.clothconfig2.forge.api.ConfigBuilder;
-import me.shedaniel.clothconfig2.forge.api.ConfigCategory;
-import me.shedaniel.clothconfig2.forge.api.ConfigEntryBuilder;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import me.shedaniel.clothconfig2.api.ConfigBuilder;
+import me.shedaniel.clothconfig2.api.ConfigCategory;
+import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class ClothConfigInterface {
 
@@ -74,11 +72,11 @@ public class ClothConfigInterface {
 
      */
 
-    private static TranslationTextComponent translateText(String msg){
-        return new TranslationTextComponent(msg);
+    private static TranslatableComponent translateText(String msg){
+        return new TranslatableComponent(msg);
     }
-    private static TranslationTextComponent translateTextTooltip(String msg){
-        return new TranslationTextComponent(msg);
+    private static TranslatableComponent translateTextTooltip(String msg){
+        return new TranslatableComponent(msg);
     }
 
 }

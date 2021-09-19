@@ -1,21 +1,27 @@
 package com.kosmx.lockMinecartView;
 
-import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.settings.KeyBindingMap;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.fmlclient.ConfigGuiHandler;
+import net.minecraftforge.fmlclient.registry.ClientRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("lock_minecart_view")
@@ -24,7 +30,7 @@ public class lockMinecartView
     // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static KeyBinding keyBinding;
+    public static KeyMapping keyBinding;
 
     public lockMinecartView() {
 
@@ -48,7 +54,7 @@ public class lockMinecartView
     private void doClientStuff(final FMLClientSetupEvent event) {
         isMixinIn();
         // do something that can only be done on the client
-        keyBinding = new KeyBinding("toggle", GLFW.GLFW_KEY_F7, "Better minecart");
+        keyBinding = new KeyMapping("toggle", GLFW.GLFW_KEY_F7, "Better minecart");
 
         ClientRegistry.registerKeyBinding(keyBinding);
 
@@ -60,12 +66,13 @@ public class lockMinecartView
         LockViewMenu.loadConfig(LockViewMenu.config, FMLPaths.CONFIGDIR.get().resolve("lock_minecart_view.toml").toString());
         LockViewClient.enabled = LockViewConfig.enableByDefault.get();
 
-        //DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> new ClothConfigInterface());
-        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (client, parent) -> {
-            return ClothConfigInterface.getClothConfigInterface().build();
-        });
+        DistExecutor.safeCallWhenOn(Dist.CLIENT, () -> () -> new ClothConfigInterface());
 
-        LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
+        ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
+                () -> new ConfigGuiHandler.ConfigGuiFactory(
+                        (minecraft, screen) -> ClothConfigInterface.getClothConfigInterface().build()));
+
+        //LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
     }
 
     private void isMixinIn(){
@@ -73,7 +80,7 @@ public class lockMinecartView
             Class.forName("org.spongepowered.asm.launch.Phases");
         }
         catch (ClassNotFoundException e) {
-            LOGGER.fatal("MixinBootstrap not found :( did you download it? \n https://www.curseforge.com/minecraft/mc-mods/mixinbootstrap");
+            LOGGER.fatal("Use Forge 37.0.59+");
         }
     }
 
