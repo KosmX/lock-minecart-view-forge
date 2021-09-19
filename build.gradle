@@ -39,7 +39,7 @@ minecraft {
         client {
             workingDirectory project.file('run')
 
-            arg "-mixin.config=physicsmod.mixins.json"
+            arg "-mixin.config=lock_minecart_view.mixins.json"
             // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
