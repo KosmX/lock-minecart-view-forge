@@ -39,6 +39,7 @@ minecraft {
         client {
             workingDirectory project.file('run')
 
+            arg "-mixin.config=physicsmod.mixins.json"
             // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
@@ -122,6 +123,7 @@ dependencies {
 
     //Mixin
     //compile 'org.spongepowered:mixin:0.8.1-SNAPSHOT'
+    annotationProcessor "org.spongepowered:mixin:0.8.4:processor"
 
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
@@ -140,7 +142,7 @@ jar {
             "Implementation-Version": "${version}",
             "Implementation-Vendor" :"",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-            "MixinConnector" : "com.kosmx.lockMinecartView.MyMixinConnector"
+            "MixinConfigs": "lock_minecart_view.mixins.json"
         ])
     }
 }
@@ -172,4 +174,44 @@ apply plugin: 'org.spongepowered.mixin'
 mixin {
     add sourceSets.main, "lock_minecart_view.refmap.json"
     //add sourceSets.another, "another.refmap.json
+
+    // Tell mixin to use the fixed TSRG file
+    reobfSrgFile = file("${buildDir}/fixMcpToSrg/output.tsrg")
+}
+
+//I don't know what am I doing
+// Generate a fixed tsrg file after generating the default tsrg file
+createMcpToSrg {
+    outputs.upToDateWhen {false}
+    doLast {
+        fixFG5TsrgForMixinAP(output.get().asFile, file("${buildDir}/fixMcpToSrg/output.tsrg"))
+    }
+}
+
+
+// Function that actually fixes the TSRG file
+static def fixFG5TsrgForMixinAP(File inFile, File outFile) {
+    // Make directory if needed
+    outFile.parentFile.mkdirs()
+
+    try (Scanner scanner = new Scanner(inFile); PrintWriter out = new PrintWriter(outFile)) {
+        boolean firstLine = true
+        while (scanner.hasNextLine()) {
+            String next = scanner.nextLine()
+
+            // Skip first 'tsrg left right' header line
+            if (firstLine) {
+                firstLine = false
+                continue
+            }
+
+            // Skip 'static' indicators
+            if (next.trim() == "static") {
+                continue
+            }
+
+            // Export line otherwise
+            out.println(next)
+        }
+    }
 }
